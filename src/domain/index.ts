@@ -7,4 +7,6 @@ export * from './entities/user.entity';
 
 export * from './dtos/category/create-category.dto';
 
+export * from './dtos/products/create-product.dto';
+
 export * from './dtos/shared/pagination.dto'
