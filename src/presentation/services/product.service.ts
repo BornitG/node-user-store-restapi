@@ -1,5 +1,6 @@
-import { ProductModel, UserModel } from "../../data";
-import { CreateProductDto, CustomError, UserEntity, PaginationDto } from "../../domain";
+import { Validators } from "../../config";
+import { ProductModel } from "../../data";
+import { CreateProductDto, CustomError, PaginationDto, UpdateProductDto } from "../../domain";
 
 
 export class ProductService {
@@ -55,5 +56,46 @@ export class ProductService {
             throw CustomError.internalServer('Internal Server Error');
         }
     };
+
+    async updateProduct( updateProductDto: UpdateProductDto ) {
+
+        const { id, name, available, price, description, category } = updateProductDto;
+        const product = await ProductModel.findById( id );
+        if ( !product )  throw CustomError.badRequest( 'Category does not exists' );
+        console.log( product.category );
+        try {
+        
+            return await ProductModel.findByIdAndUpdate( id, {
+                name,
+                available,
+                price,
+                description,
+                category
+            }, { returnDocument: "after" });
+
+        } catch (error) {
+            console.log( error );
+            throw CustomError.internalServer('Internal Server Error');
+        }
+
+    }
+
+    async deleteProduct( id: string ) {
+
+        if( !Validators.isMongoID( id ) ) throw CustomError.badRequest('Invalid Category ID');
+        const category = await ProductModel.findById( id );
+        if ( !category )  throw CustomError.badRequest( 'Category does not exists' );
+
+        try {
+            
+            const deletedCategory = await ProductModel.findByIdAndDelete( id );
+
+            return deletedCategory;
+
+        } catch (error) {
+            throw CustomError.internalServer('Internal Server Error');
+        }
+
+    }
 
 }

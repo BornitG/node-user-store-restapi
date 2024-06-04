@@ -62,7 +62,7 @@ export class CategoryController {
         const { id } = req.params;
 
         this.categoryService.deleteCategories( id )
-            .then( category => res.json( category ) )
+            .then( category => res.json({ category, message: 'Category deleted successfully' }) )
             .catch( error => this.handleError( error, res ) );
     }
 

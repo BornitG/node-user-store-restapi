@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateProductDto, CustomError, PaginationDto } from "../../domain";
+import { CreateProductDto, CustomError, PaginationDto, UpdateProductDto } from "../../domain";
 import { ProductService } from "../services";
 
 
@@ -44,5 +44,26 @@ export class ProductController {
             .then( product => res.json( product ) )
             .catch( error => this.handleError( error, res ) )
     };
+
+    updateProduct = async(req: Request, res: Response) => {
+        const { id } = req.params; 
+        const [error, updateProductDto] = UpdateProductDto.create({ 
+            ...req.body,
+            id: id,
+        });
+        if ( error ) return res.status(400).json({ error });
+
+        this.productService.updateProduct( updateProductDto! )
+            .then( product => res.json( product ) )
+            .catch( error => this.handleError( error, res ) );
+    };
+
+    deleteProduct = async(req: Request, res: Response) => {
+        const { id } = req.params;
+
+        this.productService.deleteProduct( id )
+            .then( product => res.json({ product, message: 'Product deleted successfully' }) )
+            .catch( error => this.handleError( error, res ) );
+    }
 
 };
