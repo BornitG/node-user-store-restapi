@@ -25,8 +25,6 @@ export class UpdateProductDto {
             category,
         } = props
 
-        console.log( category );
-
         if ( !id ) return ['Missing id'];
         if ( !Validators.isMongoID( id ) ) return ['Invalid Product ID'];
 

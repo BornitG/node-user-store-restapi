@@ -62,7 +62,6 @@ export class ProductService {
         const { id, name, available, price, description, category } = updateProductDto;
         const product = await ProductModel.findById( id );
         if ( !product )  throw CustomError.badRequest( 'Category does not exists' );
-        console.log( product.category );
         try {
         
             return await ProductModel.findByIdAndUpdate( id, {
