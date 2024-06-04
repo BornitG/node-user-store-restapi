@@ -1,5 +1,6 @@
+import { Validators } from "../../config";
 import { CategoryModel } from "../../data";
-import { CreateCategoryDto, CustomError, UserEntity, PaginationDto } from "../../domain";
+import { CreateCategoryDto, UpdateCategoryDto, CustomError, PaginationDto } from "../../domain";
 
 
 
@@ -7,31 +8,24 @@ export class CategoryService {
 
     constructor() {}
 
-    async createCategory( createCategoryDto: CreateCategoryDto, user: UserEntity ) {
+    async createCategory( createCategoryDto: CreateCategoryDto) {
 
         const categoryExists = await CategoryModel.findOne({ name: createCategoryDto.name });
         if ( categoryExists )  throw CustomError.badRequest( 'Category already exists' );
 
         try {
 
-            const category = new CategoryModel({
-                ...createCategoryDto,
-                user: user.id,
-            });
+            const category = new CategoryModel( createCategoryDto );
 
             await category.save()
 
-            return {
-                id: category.id,
-                name: category.name,
-                available: category.available
-            }
+            return category;
             
         } catch (error) {
             throw CustomError.internalServer(`${ error }`);
         }
 
-    }
+    };
 
     async getCategories( paginationDto: PaginationDto ) {
 
@@ -45,11 +39,6 @@ export class CategoryService {
                     .skip( (page - 1) * limit ) /// pagina 
                     .limit( limit )
             ])
-            
-            // const total = await CategoryModel.countDocuments();
-            // const categories = await CategoryModel.find()
-            //     .skip( (page - 1) * limit ) /// pagina 
-            //     .limit( limit )
 
             return{ 
                 page: page,
@@ -57,17 +46,53 @@ export class CategoryService {
                 total: total,
                 next: `/api/categories?page=${ ( page + 1) }&limi=${ limit }`,
                 prev: ( page - 1 > 0 ) ? `/api/categories?page=${ ( page - 1 ) }&limi=${ limit }`: null,
-                categories: categories.map( category => ({ 
-                    id: category.id,
-                    name: category.name,
-                    available: category.available
-                })),
+
+                categories: categories
             }
           
             
         } catch (error) {
             throw CustomError.internalServer('Internal Server Error');
         }
+    };
+
+    async updateCategories( updateCategoryDto: UpdateCategoryDto ) {
+
+        const { id, name, available } = updateCategoryDto;
+        const category = await CategoryModel.findById( id );
+        if ( !category )  throw CustomError.badRequest( 'Category does not exists' );
+
+        try {
+            
+            category.name = name ? name : category.name;
+            category.available = available ? available : category.available;
+
+            await category.save();
+
+            return category
+
+        } catch (error) {
+            throw CustomError.internalServer('Internal Server Error');
+        }
+
+    }
+
+    async deleteCategories( id: string ) {
+
+        if( !Validators.isMongoID( id ) ) throw CustomError.badRequest('Invalid Category ID');
+        const category = await CategoryModel.findById( id );
+        if ( !category )  throw CustomError.badRequest( 'Category does not exists' );
+
+        try {
+            
+            const deletedCategory = await CategoryModel.findByIdAndDelete( id );
+
+            return deletedCategory;
+
+        } catch (error) {
+            throw CustomError.internalServer('Internal Server Error');
+        }
+
     }
 
 }

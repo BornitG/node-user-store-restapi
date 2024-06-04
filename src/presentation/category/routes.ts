@@ -19,7 +19,12 @@ export class CategoryRoutes {
     
     // Definir las rutas
     router.get('/', controller.getCategories );
+
     router.post('/',[ AuthMiddleware.validateJWT ], controller.createCategory );
+
+    router.put('/:id',[ AuthMiddleware.validateJWT ], controller.updateCategory );
+
+    router.delete('/:id',[ AuthMiddleware.validateJWT ], controller.deleteCategory );
 
 
 
